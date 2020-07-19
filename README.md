@@ -1,0 +1,2 @@
+# Adaptive-Traffic-control-System
+Adaptive traffic signal control system presents an intelligent  system using density detecting technique with the help of specialized algorithm needed to avoid traffic congestion. In this density detecting technique, the vehicles are detected, recognized and density is calibrated for controlling traffic density. This is the one of the most reliable and upcoming technology in the road transit system.
