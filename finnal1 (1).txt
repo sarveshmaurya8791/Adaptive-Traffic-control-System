@@ -1,0 +1,728 @@
+#include <MPU6050_tockn.h>
+#include <Wire.h>
+
+MPU6050 mpu6050(Wire);
+#include <Servo.h>
+//#include <LiquidCrystal.h>
+Servo myservo1;// create servo1 object to control a servo
+Servo myservo2;
+long timer = 0;
+float data[3];
+float temp=0;
+int clo=0;
+int c=0;
+int fl=0;
+int bb=0;
+int xp=0;
+int xn=0;
+
+int fo=0;
+int pos = 0;
+int co=0;
+int k=0;
+int count=0;
+int i=0;
+int c1=0;
+int c2=0;
+int fl1=0;
+int cll1=0;
+int fl2=0;
+int cll2=0;
+int rrunway1=0;
+int rrunway2=0;
+int detect1;
+int detect2;
+int detect3;
+int detect4;
+int TRIG_PIN11=7;
+int ECHO_PIN11=8;
+int TRIG_PIN12=4;
+int ECHO_PIN12=11;
+int TRIG_PIN21=14;
+int ECHO_PIN21=3;
+int TRIG_PIN22=12;
+int ECHO_PIN22=5;
+//1,6,16,17
+/*int TRIG_PIN;
+int ECHO_PIN;*/
+/*int duration;
+int distance11;
+int distance12;
+int distance21;
+int distance22;*/
+// initialize the library by associating any needed LCD interface pin
+// with the arduino pin number it is connected to
+//const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+//LiquidCrystal lcd(rs, en, d4, d5, d6, d7); 
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();
+  mpu6050.begin();
+  mpu6050.calcGyroOffsets(true);
+  /*  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);*/
+  //Serial.begin(BAUD_RATE);
+   pinMode(17, INPUT);// set pin as input led red1
+   pinMode(16,INPUT);//led green1
+   pinMode(15,INPUT);//ledred2
+   pinMode(13,INPUT);//led green2
+   pinMode(TRIG_PIN11,OUTPUT);//ir1
+   pinMode(TRIG_PIN12,OUTPUT);//ir2
+   pinMode(TRIG_PIN21,OUTPUT);//ir3
+   pinMode(TRIG_PIN22,OUTPUT);//ir4
+   pinMode(ECHO_PIN11, INPUT);// set pin as input led red1
+   pinMode(ECHO_PIN12,INPUT);//led green1
+   pinMode(ECHO_PIN21,INPUT);//ledred2
+   pinMode(ECHO_PIN22,INPUT);//led green2
+   myservo1.attach(10);  // attaches the servo1 on pin 9 to the servo object
+   myservo2.attach(9);  // attaches the servo2 on pin 10 to the servo object
+    // set up the LCD's number of columns and rows:
+   // lcd.begin(16, 2);
+   // Print a message to the LCD.
+   cl1();
+   cl2();
+   Serial.println("WELCOME");//lcd.print("WELCOME ");
+}
+
+void loop() {
+ //mpu6050.getFIFOBytes(fifoBuffer,packetSize);
+//mpu6050.resetFIFO();
+//  mpu6050.initialize();
+  //  mpu6050.end();
+       mpu6050.begin();
+ // mpu6050.calcGyroOffsets(true);
+     mpu6050.update();
+     mpu6050.begin();
+  if(millis() - timer > 1000){
+    
+    Serial.println("=======================================================");
+    Serial.print("temp : ");Serial.println(mpu6050.getTemp());
+    Serial.print("accX : ");Serial.print(mpu6050.getAccX());
+    Serial.print("  accY : ");Serial.print(mpu6050.getAccY());
+    Serial.print("  accZ : ");Serial.println(mpu6050.getAccZ());
+  
+    Serial.print("gyroX : ");Serial.print(mpu6050.getGyroX());
+    Serial.print("  gyroY : ");Serial.print(mpu6050.getGyroY());
+    Serial.print("  gyroZ : ");Serial.println(mpu6050.getGyroZ());
+  
+    Serial.print("accAngleX : ");Serial.print(mpu6050.getAccAngleX());
+    Serial.print("  accAngleY : ");Serial.println(mpu6050.getAccAngleY());
+  
+    Serial.print("gyroAngleX : ");Serial.print(mpu6050.getGyroAngleX());
+    Serial.print("  gyroAngleY : ");Serial.print(mpu6050.getGyroAngleY());
+    Serial.print("  gyroAngleZ : ");Serial.println(mpu6050.getGyroAngleZ());
+    
+    Serial.print("angleX : ");Serial.print(mpu6050.getAngleX());
+    Serial.print("  angleY : ");Serial.print(mpu6050.getAngleY());
+    Serial.print("  angleZ : ");Serial.println(mpu6050.getAngleZ());
+    Serial.println("=======================================================");
+  timer = millis();
+  }
+ if(mpu6050.getAngleX()>50&&mpu6050.getAngleX()<110)
+ {
+  xp=1;
+  Serial.println("xp");
+ }
+ if(mpu6050.getAngleX()<-50&&mpu6050.getAngleX()>-110)
+ {
+  xn=1;
+  
+  Serial.println("xn");
+ }
+
+  if(xp==1&&xn==0)
+  {
+    
+  //Serial.println("in");
+     if(fl==1)
+    {
+      temp=data[0]-mpu6050.getAngleY();
+    }
+    if(temp>20&&temp<50&&fl==1)
+    {
+    fl=0;
+    data[0]=0;
+    cl1(); 
+    Serial.println("close ");
+    }
+   if(mpu6050.getAngleY()>50&&mpu6050.getAngleY()<110&&fl==0)
+    {
+    
+    //delay(1000);
+    fl=1;
+    op1();
+    Serial.println("front");
+    data[0]=mpu6050.getAngleY();
+      //  Serial.println(mpu6050.getAngleY()); 
+    }
+  
+     if(bb==1)
+  {
+  temp=data[1]+mpu6050.getAngleY();
+  }
+  if(temp>20&&temp<50&&bb==1)
+  {
+    bb=0;
+    data[1]=0;
+    cl2();
+    Serial.println("close b");
+  }
+  if(mpu6050.getAngleY()<-50&&mpu6050.getAngleY()>-100&&bb==0)
+  {
+    //delay(1000);
+    bb=1;
+    op2();
+    Serial.println("front b");
+    data[1]=-mpu6050.getAngleY();
+      //  Serial.println(mpu6050.getAngleY()); 
+  }
+ }
+  else
+  {
+    xp=0;
+    xn=0;
+   fl1=0;
+   fl2=0;
+   cll1=0;
+   cll2=0;
+   rrunway1=0;
+   rrunway2=0;
+   digitalWrite(17,HIGH);
+   digitalWrite(15,HIGH);
+   //cl1();
+   //cl2();
+   /*int detect1 = digitalRead(14);// read obstacle status and store it into "detect"
+   int detect2=digitalRead(13);
+   int detect3=digitalRead(16);
+   int detect4=digitalRead(17);
+   */
+   check1();
+   check2();
+   if(co==k)
+   {
+
+     road1();
+     digitalWrite(16,LOW);
+     digitalWrite(17,HIGH);
+     if(fl1==1)
+     {
+  
+      cl1();
+     }
+      check1();
+      check2();
+      //analogWrite(6,60);
+      // lcd.setCursor(0, 1);
+      count=0;
+      //Serial.println(count);//lcd.print(count);
+      road2();
+      digitalWrite(13,LOW);
+      digitalWrite(15,HIGH);
+      if(fl2==1)
+      {
+        cl2();
+       }
+        check1();
+        check2();
+        //analogWrite(6,60);
+        // lcd.setCursor(0, 1);
+        count=0;
+        //Serial.println(count);//  lcd.print(count);
+      }
+   
+  else if(co<k)
+  {
+    
+    count=0;
+    runway2();
+    digitalWrite(13,LOW);
+    digitalWrite(15,HIGH);
+    
+    if(fl2==1)
+    {
+      cl2();
+     }
+      check1();
+      check2();
+      //analogWrite(6,60);
+      // lcd.setCursor(0, 1);
+    
+      //Serial.println(count);// lcd.print(count);
+      if(co<k&&co==0)
+      {
+        digitalWrite(17,LOW);
+        digitalWrite(16,HIGH);
+        op1();
+        c1=c1+1;
+        c2=0;
+        Serial.println("rOADd 1");
+        count=0;
+        if(co<k&&co==0)
+        {
+          for(i=0;i<5;i++)
+          {
+            count=count+1;
+            Serial.print(count);
+            Serial.print("  ");
+            delay(1000);}
+            Serial.println();
+          }
+        digitalWrite(16,LOW);
+        digitalWrite(17,HIGH);
+        if(fl1==1)
+      {
+  
+        cl1();
+       }
+       //analogWrite(6,60);
+       //  lcd.setCursor(0, 1);
+       count=0;
+      // Serial.println(count);//lcd.print(count);
+       check1();
+       check2();
+      }
+    if(co<k&&co!=0)
+    {
+      digitalWrite(17,LOW);
+      digitalWrite(16,HIGH);
+      op1();
+      c1=c1+1;
+      c2=0;
+      Serial.println("rOAD 1");
+      count=0;
+      timmer2();
+      digitalWrite(16,LOW);
+      digitalWrite(17,HIGH);
+      if(fl1==1)//update
+      {
+        fl1=0;
+        //cl2=1;
+        cl1();
+      }
+  }
+   //  analogWrite(6,60);
+    //  lcd.setCursor(0, 1);
+    count=0;
+    // Serial.println(count);//lcd.print(count);
+    check1();
+    check2();
+    }
+    
+  else
+  {
+    runway1();
+    digitalWrite(16,LOW);
+    digitalWrite(17,HIGH);
+    if(fl1==1)
+    {
+      fl1=0;
+      //cl1=1;
+      cl1();}
+      check1();
+      check2();
+      //analogWrite(6,60);
+      //  lcd.setCursor(0, 1);
+      count=0;
+      //Serial.println(count);//lcd.print(count);
+     //Serial.println(k);
+     //k=0;
+     if(co>k&&k==0)
+     {
+       digitalWrite(15,LOW);
+       digitalWrite(13,HIGH);
+       op2();
+       c2=c2+1;
+       c1=0;
+       Serial.println("rOADd 2");
+       count=0;
+       check1();
+       check2();
+       if(co>k&&k==0)
+       {
+       for(i=0;i<5;i++)
+       {
+         count=count+1;
+         Serial.print(count);
+         Serial.print("  ");
+         delay(1000);}
+         Serial.println();
+        }
+       digitalWrite(13,LOW);
+       digitalWrite(15,HIGH);
+       if(fl2==1)
+       {
+         cl2();
+        }
+      //analogWrite(6,60);
+      //lcd.setCursor(0, 1);
+      count=0;
+     //Serial.println(count);//lcd.print(count);}
+     }
+     if(co>k&&k!=0)
+     {
+       digitalWrite(15,LOW);
+       digitalWrite(13,HIGH);
+       op2();
+       c2=c2+1;
+       c1=0;
+       Serial.println("rOAD 2");
+       timmer2();
+       digitalWrite(13,LOW);
+       digitalWrite(15,HIGH);
+    
+       if(fl2==1)
+       {
+         cl2();
+        }
+       //analogWrite(6,60);
+       //lcd.setCursor(0, 1);
+       count=0;
+       //Serial.println(count);//lcd.print(count);}
+     }
+   }
+  
+ }
+ //mpu6050.update();
+ 
+}
+void op1()
+ {
+  fl1=1;
+  cll1=0;
+  for (pos =0; pos <= 75; pos += 1)
+  {                                      // goes from 0 degrees to 180 degrees
+ 
+    // in steps of 1 degree
+    myservo1.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+ }
+ void cl1()
+ {
+  fl1=0;
+  cll1=1;
+  for (pos = 75; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+  myservo1.write(pos);              // tell servo to go to position in variable 'pos'
+  delay(15);                       // waits 15ms for the servo to reach the position
+}
+ }
+  void op2()
+ {
+  fl2=1;
+  cll2=0;
+  for (pos =0; pos <= 75; pos += 1)
+  {                                   // goes from 0 degrees to 180 degrees
+ 
+    // in steps of 1 degree
+    myservo2.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+ }
+ void cl2()
+ {
+  cll2=1;
+  fl2=0;
+  for (pos = 75; pos >= 0; pos -= 1)
+  {                                     // goes from 180 degrees to 0 degrees
+    myservo2.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+}
+ }
+ void check1()
+ {
+   
+  digitalWrite(TRIG_PIN11, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN11, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN11, LOW);
+
+ const unsigned long duration11= pulseIn(ECHO_PIN11, HIGH);
+ int distance11= duration11/29/2;
+
+ ///Serial.print("distance11 ");
+  //Serial.println(distance11);
+
+
+ 
+  digitalWrite(TRIG_PIN12, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN12, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN12, LOW);
+   co=0;
+   //int detect1 = digitalRead(14);// read obstacle status and store it into "detect"
+   /*if(detect1==HIGH)
+   {*/
+    
+
+
+
+
+ 
+ const unsigned long duration12= pulseIn(ECHO_PIN12, HIGH);
+ 
+ int distance12= duration12/29/2;
+ ///Serial.print("distance12 ");
+  //Serial.println(distance12);
+     
+ 
+ if(distance11<=6){
+    co=co+1;
+     Serial.print("distance11 ");
+  Serial.println(distance11);//,distance11);
+  //,distance12);
+    //int detect2=digitalRead(13);
+    if(distance12<=6)
+    {
+       Serial.print("distance12 ");
+  Serial.println(distance12);
+      co=co+1;
+     }
+      // Serial.print("co:");
+      //  Serial.print(co);
+   }
+ }
+  void check2()
+ {
+   digitalWrite(TRIG_PIN21, LOW);
+   delayMicroseconds(2);
+  digitalWrite(TRIG_PIN21, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN21, LOW);
+  
+  
+ const unsigned long duration21= pulseIn(ECHO_PIN21, HIGH);
+ 
+ int distance21= duration21/29/2;
+//Serial.print("distance21 ");
+  //Serial.println(distance21);
+  k=0;
+  //sr(TRIG_PIN21,ECHO_PIN22);
+  digitalWrite(TRIG_PIN21, LOW);
+   delayMicroseconds(2);
+  digitalWrite(TRIG_PIN22, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN22, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN22, LOW);
+    
+  //int detect3=digitalRead(16);
+
+
+ const unsigned long duration22= pulseIn(ECHO_PIN22, HIGH);
+ int distance22= duration22/29/2;
+  /*if(detect3==HIGH)
+  {*/
+
+    //  Serial.print("distance22 oo ");
+  //Serial.println(distance22);
+    if(distance21<=6){
+    k=k+1;
+    Serial.print("distance21 iii ");
+  Serial.println(distance21);
+  
+  
+   // int detect4=digitalRead(17);
+   /* if(detect4==HIGH)
+    {*/
+      if(distance22<=6){
+    k=k+1;
+    Serial.print("distance22 iiiii");
+  Serial.println(distance22);
+  }
+      // Serial.print("k:");
+      //  Serial.println(k); 
+     }
+     //Serial.println(k);
+ }
+  void timmer1()
+  {
+    count=0;
+    for(i=0;i<20;i++)
+    {
+      count=count+1;
+      check1();
+      check2();
+      
+      if((c1>2)||(c2>2&&co>k))//update 2 update
+      {
+         Serial.println(c1);
+          Serial.println(c2);
+        Serial.println("breakkkkk");
+        break;
+      }
+      if(((co<k&&rrunway2==0)||(co>k&&rrunway1==0))&&(count>=11))
+      {
+        
+        if(rrunway1==1)
+        {
+          rrunway1=0;
+        }
+        if(rrunway2==1)
+        {
+          rrunway2=0;
+        }
+        //Serial.print("break");
+        break;
+      }
+        analogWrite(6,60);
+        //lcd.setCursor(0, 1);
+        Serial.print(count);//lcd.print(count);
+      
+        Serial.print("  ");
+        delay(1000);}
+        Serial.println();
+ }
+ void timmer2()
+  {
+    count=0;
+    for(i=0;i<10;i++)
+    {
+      count=count+1;
+      analogWrite(6,60);
+      
+      // lcd.setCursor(0, 1);
+      Serial.print(count);//lcd.print(count);
+     
+      Serial.print("  ");
+      delay(1000);}
+      
+      Serial.println();
+ }
+ void road1()
+ {
+    //c1=c1+1;
+    //c2=0;
+    if(co==k&&(c1<1&&c2<=1))
+    {
+       c1=c1+1;
+       c2=0;  
+       digitalWrite(17,LOW);
+       digitalWrite(16,HIGH);
+       op1();
+       Serial.println("ROAD 1");
+       timmer1();
+       check1();
+       check2();
+       }
+     else{
+           digitalWrite(16,LOW);
+           digitalWrite(17,HIGH);
+           if(fl1==1)
+           {
+  
+             cl1();
+            }
+        }
+   }
+ void road2()
+ {
+    // c2=c2+1;
+    // c1=0;
+    // Serial.println("r2");
+    // Serial.println(c1);
+    if(co==k&&(c2<1&&c1<=1))
+    {
+      c2=c2+1;
+      c1=0;
+      digitalWrite(15,LOW);
+      digitalWrite(13,HIGH);
+      op2();
+      Serial.println("ROAD 2");
+      timmer1();
+      check1();
+      check2();
+     }
+     else
+     {
+      digitalWrite(13,LOW);
+      digitalWrite(15,HIGH);
+    
+      if(fl2==1)
+      {
+        cl2();
+       }
+    }
+  }
+ void runway2()
+ {
+  
+    //c2=c2+1;
+    //c1=0;
+    //Serial.println("run2");
+    //  Serial.println(c1);
+    rrunway2=1;
+    if(co<k)
+    {
+      c2=c2+1;
+      c1=0;
+      digitalWrite(15,LOW);//red
+      digitalWrite(13,HIGH);//green
+      op2();
+      Serial.println("RROAD 2");
+      timmer1();
+      check1();
+      check2();
+     }
+      else
+      {
+        digitalWrite(13,LOW);
+        digitalWrite(15,HIGH);
+        if(fl2==1)
+        {
+          cl2();
+         }
+      }
+  }
+  void runway1()
+ {
+    //c1=c1+1;
+    // c2=0;
+    //Serial.println("run1");
+    // Serial.println(c1);
+    rrunway1=1;
+    if(co>k)
+    {
+      c1=c1+1;
+      c2=0;
+      
+      digitalWrite(17,LOW);
+      digitalWrite(16,HIGH);
+      op1();
+      Serial.println("RROAD 1");
+      timmer1();
+      check1();
+      check2();
+     }
+      else 
+      {
+        digitalWrite(16,LOW);
+        digitalWrite(17,HIGH);
+        if(fl1==1)
+        {
+  
+          cl1();
+         }
+      }
+  }
+ 
+  
+ /* else if(mpu6050.getAngleY()<-50&&mpu6050.getAngleY()>-100)
+  {
+    clo=0;
+    Serial.println("BACK");
+  }
+  else if(mpu6050.getAngleX()>50&&mpu6050.getAngleX()<110)
+  {
+    clo=0;
+    Serial.println("Right");
+  }
+  else if(mpu6050.getAngleX()<-50&&mpu6050.getAngleX()>-100)
+  {
+    clo=0;
+    Serial.println("Left");
+  }
+  }
+  
+}*/
