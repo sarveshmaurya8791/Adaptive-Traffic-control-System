@@ -1,0 +1,322 @@
+
+#include <Servo.h>
+#include <LiquidCrystal.h>
+Servo myservo1;// create servo1 object to control a servo
+Servo myservo2;// create servo2 object to control a servo
+// twelve servo objects can be created on most boards
+int fo=0;
+int pos = 0;
+int co=0;
+int k=0;
+int count=0;
+int i=0;
+int c1=0;
+int c2=0;
+int rrunway1=0;
+int rrunway2=0;
+int detect1;
+int detect2;
+int detect3;
+int detect4;
+// initialize the library by associating any needed LCD interface pin
+// with the arduino pin number it is connected to
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);    
+ void setup() {
+ Serial.begin(9600);
+ pinMode(8, INPUT);// set pin as input led red1
+ pinMode(7,INPUT);//led green1
+ pinMode(15,INPUT);//ledred2
+  pinMode(16,INPUT);//led green2
+ pinMode(14,INPUT);//ir1
+ pinMode(13,INPUT);//ir2
+ pinMode(17,INPUT);//ir3
+ pinMode(18,INPUT);//ir4
+  myservo1.attach(9);  // attaches the servo1 on pin 9 to the servo object
+   myservo2.attach(10);  // attaches the servo2 on pin 10 to the servo object
+    // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  // Print a message to the LCD.
+  Serial.println("WELCOME");//lcd.print("WELCOME ");
+}
+
+void loop() {
+  rrunway1=0;
+  rrunway2=0;
+  digitalWrite(8,HIGH);
+  digitalWrite(15,HIGH);
+  cl1();
+  cl2();
+  int detect1 = digitalRead(14);// read obstacle status and store it into "detect"
+ int detect2=digitalRead(13);
+  int detect3=digitalRead(17);
+  int detect4=digitalRead(18);
+  check1();
+  check2();
+  if(co==k){
+    road1();
+    digitalWrite(7,LOW);
+    digitalWrite(8,HIGH);
+    cl1();
+    check1();
+    check2();
+    analogWrite(6,60);
+  lcd.setCursor(0, 1);
+  count=0;
+  //Serial.println(count);//lcd.print(count);
+  road2();
+   digitalWrite(16,LOW);
+    digitalWrite(15,HIGH);
+    cl2();
+    check1();
+    check2();
+    analogWrite(6,60);
+     lcd.setCursor(0, 1);
+     count=0;
+//Serial.println(count);//  lcd.print(count);
+  }
+  else if(co<k){
+     count=0;
+    runway2();
+     digitalWrite(16,LOW);
+    digitalWrite(15,HIGH);
+    cl2();
+    check1();
+      check2();
+      analogWrite(6,60);
+     lcd.setCursor(0, 1);
+    
+ //Serial.println(count);// lcd.print(count);
+  if(co<k){
+    digitalWrite(8,LOW);
+    digitalWrite(7,HIGH);
+    op1();
+    c1=c1+1;
+    c2=0;
+    Serial.println("rOAD 1");
+    timmer2();
+    digitalWrite(7,LOW);
+    digitalWrite(8,HIGH);
+    cl1();
+     analogWrite(6,60);
+     lcd.setCursor(0, 1);
+     count=0;
+ // Serial.println(count);//lcd.print(count);
+    check1();
+    check2();}
+  }
+  else {
+    runway1();
+     digitalWrite(7,LOW);
+    digitalWrite(8,HIGH);
+    cl1();
+    check1();
+    check2();
+     analogWrite(6,60);
+     lcd.setCursor(0, 1);
+     count=0;
+  //Serial.println(count);//lcd.print(count);
+  if(co>k){
+    digitalWrite(15,LOW);
+    digitalWrite(16,HIGH);
+    op2();
+    c2=c2+1;
+    c1=0;
+    Serial.println("rOAD 2");
+    timmer2();
+    digitalWrite(16,LOW);
+    digitalWrite(15,HIGH);
+    cl2();
+     analogWrite(6,60);
+     lcd.setCursor(0, 1);
+     count=0;
+  //Serial.println(count);//lcd.print(count);}
+    }
+  
+    }
+
+}
+ void op1()
+ {
+  for (pos =0; pos <= 75; pos += 1) { // goes from 0 degrees to 180 degrees
+ 
+    // in steps of 1 degree
+    myservo1.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+ }
+ void cl1()
+ {
+  for (pos = 75; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+   // myservo1.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+}
+ }
+  void op2()
+ {
+  for (pos =0; pos <= 75; pos += 1) { // goes from 0 degrees to 180 degrees
+ 
+    // in steps of 1 degree
+    myservo2.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+ }
+ void cl2()
+ {
+  for (pos = 75; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+    myservo2.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+}
+ }
+ void check1()
+ {
+  co=0;
+    int detect1 = digitalRead(14);// read obstacle status and store it into "detect"
+  if(detect1==HIGH){
+    co=co+1;
+     int detect2=digitalRead(13);
+    if(detect2==HIGH){
+      co=co+1;}
+     // Serial.print("co:");
+    //  Serial.print(co);
+       }
+ }
+  void check2()
+ {
+  k=0;
+   int detect3=digitalRead(17);
+  if(detect3==HIGH){
+    k=k+1;
+    int detect4=digitalRead(18);
+    if(detect4==HIGH){
+      k=k+1;}
+    // Serial.print("k:");
+    //  Serial.println(k); 
+  }
+ }
+  void timmer1()
+  {
+    count=0;
+    for(i=0;i<20;i++){
+      count=count+1;
+      check1();
+      check2();
+      if(c1>=2||c2>=2)
+      {
+        // Serial.println(c1);
+        //  Serial.println(c2);
+       //Serial.println("breakkkkk");
+        break;
+      }
+      if(((co<k&&rrunway2==0)||(co>k&&rrunway1==0))&&(count>=11)){
+        if(rrunway1==1)
+        {
+          rrunway1=0;
+        }
+        if(rrunway2==1)
+        {
+          rrunway2=0;
+        }
+       // Serial.print("break");
+        break;
+      }
+       analogWrite(6,60);
+     lcd.setCursor(0, 1);
+      Serial.print(count);//lcd.print(count);
+      
+      Serial.print("  ");
+      delay(1000);}
+      Serial.println();
+ }
+ void timmer2()
+  {
+    count=0;
+    for(i=0;i<10;i++){
+      count=count+1;
+       analogWrite(6,60);
+     lcd.setCursor(0, 1);
+      Serial.print(count);//lcd.print(count);
+     
+      Serial.print("  ");
+      delay(1000);}
+      
+      Serial.println();
+ }
+ void road1()
+ {
+    c1=c1+1;
+    c2=0;
+    if(co==k){
+      digitalWrite(8,LOW);
+      digitalWrite(7,HIGH);
+      op1();
+      Serial.println("ROAD 1");
+      timmer1();
+      check1();
+      check2();}
+     else{
+      digitalWrite(7,LOW);
+      digitalWrite(8,HIGH);
+      cl1();}
+     }
+ void road2()
+ {
+  c2=c2+1;
+  c1=0;
+  // Serial.println("r2");
+   // Serial.println(c1);
+    if(co==k){
+      digitalWrite(15,LOW);
+      digitalWrite(16,HIGH);
+      op2();
+      Serial.println("ROAD 2");
+      timmer1();
+      check1();
+      check2();}
+     else {
+      digitalWrite(16,LOW);
+      digitalWrite(15,HIGH);
+      cl2();}
+     }
+ void runway2()
+ {
+  
+  c2=c2+1;
+  c1=0;
+   //Serial.println("run2");
+  //  Serial.println(c1);
+  rrunway2=1;
+    if(co<k){
+      digitalWrite(15,LOW);//red
+      digitalWrite(16,HIGH);//green
+      op2();
+      Serial.println("RROAD 2");
+      timmer1();
+      check1();
+      check2();}
+      else {
+        digitalWrite(16,LOW);
+      digitalWrite(15,HIGH);
+      cl2();}
+  }
+  void runway1()
+ {
+  c1=c1+1;
+  c2=0;
+   //Serial.println("run1");
+   // Serial.println(c1);
+  rrunway1=1;
+    if(co>k){
+      digitalWrite(8,LOW);
+      digitalWrite(7,HIGH);
+      op1();
+      Serial.println("RROAD 1");
+      timmer1();
+      check1();
+      check2();}
+      else {
+        digitalWrite(7,LOW);
+      digitalWrite(8,HIGH);
+      cl1();}
+  }
+ 
